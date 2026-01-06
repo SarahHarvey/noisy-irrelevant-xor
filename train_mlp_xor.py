@@ -152,10 +152,12 @@ activations["model_weights"] = {name: param.detach().cpu() for name, param in mo
 
 # Clean up hook
 hook_handle.remove()
+hook_handle_1.remove()
+hook_handle_2.remove()
 
 # Check if directory exists, if not create it
 
-if not os.path.exists("mlp_xor_reps"):
-    os.makedirs("mlp_xor_reps")
+if not os.path.exists("trained_activations"):
+    os.makedirs("trained_activations")
 
-torch.save(activations, f"mlp_xor_reps/mlp_xor_activations_seed{str(seed)}_nhidden{n_hidden}_ntest{n_test}.pt")
+torch.save(activations, f"trained_activations/mlp_xor_activations_seed{str(seed)}_nhidden{n_hidden}_ntest{n_test}.pt")

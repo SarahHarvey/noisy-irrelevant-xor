@@ -1,0 +1,6 @@
+jupyter==1.1.1
+matplotlib==3.10.8
+numpy==2.4.0
+plotly==6.5.0
+scikit-learn==1.8.0
+torch==2.9.1
