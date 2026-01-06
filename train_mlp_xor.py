@@ -132,7 +132,7 @@ with torch.no_grad():
     predicted_labels = (predictions > 0.5).float() #predictions.float()
     print("\nXOR Results (test inputs):")
     for i in range(4):
-        print(f"Input: {X_test[i].cpu().numpy()} -> Predicted: {predicted_labels[i].item():.2f}, Actual: {y_test[i].item():.0f}")
+        print(f"Input: {X_test[i].cpu()} -> Predicted: {predicted_labels[i].item():.2f}, Actual: {y_test[i].item():.0f}")
     # Print prediction accuracy
     correct = (predicted_labels.round() == y_test).sum().item()
     accuracy = correct / n_test * 100
@@ -145,7 +145,7 @@ with torch.no_grad():
 # Print activations after ReLU for some test inputs
 print("\nReLU Activations for each test input:")
 for i in range(4):
-    print(f"Input: {X_test[i].cpu().numpy()} -> ReLU activations: {activations['relu'][i].numpy()}")
+    print(f"Input: {X_test[i].cpu()} -> ReLU activations: {activations['relu'][i].cpu()}")
 
 # Save model weights
 activations["model_weights"] = {name: param.detach().cpu() for name, param in model.named_parameters()}
