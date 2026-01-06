@@ -16,7 +16,7 @@ python train_mlp_xor.py n_hidden load_data seed
 ```
 where n_hidden is the number of units in the hidden layer, load_data = True will load a previously-generated noisy xor dataset with a third irrelevant random bit.  This dataset has 10000 training points and 2000 test points.  Seed specifies the pytorch seed.  
 
-This will save the hidden layer activations to a .pt file "trained_activations/mlp_xor_activations_seed{str(seed)}_nhidden{n_hidden}_ntest2000.pt"
+This will save the hidden layer activations to a .pt file ```trained_activations/mlp_xor_activations_seed{seed}_nhidden{n_hidden}_ntest2000.pt```
 
 **To view and analyze previously extracted representations:**
 
