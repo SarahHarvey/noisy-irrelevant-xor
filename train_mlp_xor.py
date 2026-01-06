@@ -46,7 +46,7 @@ n_test = 2000
 noise_std = 0.1
 
 if args.load_data:
-    data = torch.load("mlp_xor_dataset.pt")
+    data = torch.load("data/mlp_xor_dataset.pt")
     X_train = data["train_set"]["X_train"].to(device)
     y_train = data["train_set"]["y_train"].to(device)
     bits = data["bits_train"].to(device)
