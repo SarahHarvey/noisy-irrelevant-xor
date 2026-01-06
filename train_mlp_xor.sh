@@ -8,7 +8,6 @@
 #SBATCH --time=0-01:00:00                # Time limit days-hrs:min:sec
 #SBATCH --gres=gpu:1                     # Request 1 GPU
 #SBATCH --partition=gpu                  # GPU partition 
-#SBATCH --mail-type=ALL --mail-user=sharvey@flatironinstitute.org
 
 N_HIDDEN=${1:-6}   # Default to 6 if not provided
 LOAD_DATA=${2:-false}  # Default to false if not provided
