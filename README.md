@@ -1,6 +1,6 @@
 # Decoding signal geometry example
 
-Small example of analyzing decoded signal geometry with single hidden layer mlp trained on noisy XOR task with irrelevant random input bit.
+Small example of analyzing decoded signal geometry with single hidden layer mlp trained on noisy XOR task with irrelevant random input bit.  The representations analyzed are the hidden layer activations in response to 2000 probe inputs.  
 
 Instructions:
 
