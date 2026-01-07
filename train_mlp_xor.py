@@ -39,13 +39,10 @@ class MLP(nn.Module):
         x = self.relu(x)
         x = self.fc2(x)
         return x
-
-# Create noisy XOR data
-n_samples = 10000
-n_test = 2000
-noise_std = 0.1
-
+    
+# Load or create dataset
 if args.load_data:
+    # Load existing dataset
     data = torch.load("data/mlp_xor_dataset.pt")
     X_train = data["train_set"]["X_train"].to(device)
     y_train = data["train_set"]["y_train"].to(device)
@@ -59,7 +56,6 @@ if args.load_data:
     n_test = X_test.shape[0]
     
 else:
-
     # Create noisy XOR data
     n_samples = 10000
     n_test = 2000
@@ -104,9 +100,9 @@ def get_activation(name):
     return hook
 
 # Register hook on the ReLU layer
-hook_handle = model.relu.register_forward_hook(get_activation('relu'))
-hook_handle_2 = model.fc2.register_forward_hook(get_activation('fc2'))
-hook_handle_1 = model.fc1.register_forward_hook(get_activation('fc1'))
+hook_handle_relu = model.relu.register_forward_hook(get_activation('relu'))
+hook_handle_fc2 = model.fc2.register_forward_hook(get_activation('fc2'))
+hook_handle_fc1 = model.fc1.register_forward_hook(get_activation('fc1'))
 
 # Training loop
 epochs = 1000
@@ -150,13 +146,15 @@ for i in range(4):
 # Save model weights
 activations["model_weights"] = {name: param.detach().cpu() for name, param in model.named_parameters()}
 
+# Save accuracy
+activations["test_accuracy"] = accuracy
+
 # Clean up hook
-hook_handle.remove()
-hook_handle_1.remove()
-hook_handle_2.remove()
+hook_handle_relu.remove()
+hook_handle_fc1.remove()
+hook_handle_fc2.remove()
 
 # Check if directory exists, if not create it
-
 if not os.path.exists("trained_activations"):
     os.makedirs("trained_activations")
 
