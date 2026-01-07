@@ -54,6 +54,7 @@ if args.load_data:
     bits_test = data["bits_test"].to(device)
     n_samples = X_train.shape[0]
     n_test = X_test.shape[0]
+    noise_std = 0.1
     
 else:
     # Create noisy XOR data

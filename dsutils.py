@@ -10,11 +10,7 @@ from typing import Tuple
 from sklearn.model_selection import KFold
 from tqdm import tqdm  # optional for progress bar
 from itertools import product
-
-
-
 from torch import nn
-# from torchvision import models
 
 def cross_val_score_custom(model_class, X, Z, param_grid, loss_fn, cv=5, kernel='linear'):
     
@@ -53,19 +49,14 @@ def cross_val_score_custom(model_class, X, Z, param_grid, loss_fn, cv=5, kernel=
 
     return best_params, best_score, X_train, Z_train, all_params_coefs
 
-
 def mse_loss(y_true, y_pred, params):
-    # Example: weighted MSE (or any custom logic)
     M = y_true.shape[0]
     return np.mean((y_true - y_pred) ** 2)
 
 def inner_product_loss(y_true, y_pred, params):
-    # Example: weighted MSE (or any custom logic)
     M = y_true.shape[0]
     a = params[0]
-    return np.mean((y_true - y_pred) ** 2)
-    # return -np.trace(2* y_pred.T @ y_true - a* y_pred.T @ y_pred) #- y_true.T @ y_true)
-
+    return -np.trace(2* y_pred.T @ y_true - a* y_pred.T @ y_pred) #- y_true.T @ y_true)
 
 def rbf_kernel(X, Y=None, gamma=1.0, center=False):
     """
@@ -105,8 +96,6 @@ def rbf_kernel(X, Y=None, gamma=1.0, center=False):
     else:  
         return K
 
-
-
 def linear_kernel(X, Y=None, center=False):
     """
     Evaluate the linear kernel between two sets of vectors.
@@ -137,7 +126,6 @@ def linear_kernel(X, Y=None, center=False):
     else:  
         return K
 
-
 class genKernelRegression:
     
     def __init__(self,  center_columns=True, kernel = 'linear',  a=0, b=1, gamma = 1.0, fit_intercept=False):
@@ -149,7 +137,6 @@ class genKernelRegression:
         self.coef_ = None
         self.intercept_ = None
         self.kernel = kernel
-
 
     def _add_intercept(self, X):
         return np.hstack([np.ones((X.shape[0], 1)), X])
@@ -180,19 +167,12 @@ class genKernelRegression:
         else: 
             KX = linear_kernel(X,center=True)
             
-        # XtX = X.T @ X
-        # Xty = X.T @ y\
-        # print(self.b)
-        # print('  ')
-        # print(self.gamma)
         try:
-            # self.weights_ = np.linalg.inv(self.a*KX + self.b *Im) @ Z
-            # self.weights_ = np.linalg.pinv(self.a*KX + self.b *Im) @ Z
             self.weights_ = np.linalg.solve(self.a*KX + self.b *Im, Im) @ Z
-
         except np.linalg.LinAlgError:
             print(f"Skipping hyperparams {self.a}, {self.b}, {self.gamma}: matrix is singular.")
             self.weights_ = np.full(Z.shape, np.nan)
+
         if self.fit_intercept:
             self.intercept_ = self.weights_[0, 0]
             self.coef_ = self.weights_[1:, 0]
@@ -214,7 +194,7 @@ class genKernelRegression:
             KXXtrain = linear_kernel(X,self.Xtrain, center=True)
         else: 
             KXXtrain = linear_kernel(X,self.Xtrain, center=True)
-        # KXXtrain = rbf_kernel(X,self.Xtrain, gamma = self.gamma)
+
         if self.fit_intercept:
             return self.intercept_ + KXXtrain @ self.coef_
         else:
@@ -226,77 +206,6 @@ class genKernelRegression:
         ss_res = np.sum((Z - Z_pred) ** 2)
         ss_tot = np.sum((Z - np.mean(Z,axis=0)) ** 2)
         return 1 - ss_res / ss_tot
-
-
-
-class Frechet:  # NEEDS REVISITING
-    
-    def __init__(self):
-        pass
-
-    # def mean(self, Cz, cached):
-    #     Kbar = np.zeros(np.shape(cached[0]))
-    #     nmodels = len(cached)
-    #     d = np.shape(cached[0])[0]
-    #     for i in range(d):
-    #         for j in range(d):
-    #             for n in range(nmodels):
-    #                 M = cached[n]@Cz
-    #                 Kbar[i,j] = Kbar[i,j] + (1/(nmodels*Cz[i,j]))*M[j,i]
-    #         print(i)
-    #     return Kbar
-
-
-    # def mean(self, Cz, cached):
-    #     Kbar = np.zeros(np.shape(cached[0]))
-    #     nmodels = len(cached)
-    #     d = np.shape(cached[0])[0]
-    #     for n in range(nmodels):
-    #         M = cached[n]@Cz
-    #         Kbar = Kbar + (1/nmodels) * (1/Cz) * np.transpose(M)
-    #         print(n)
-    #     return Kbar
-    
-    def arith_mean(self, cached):
-        Abar = np.zeros(np.shape(cached[0]))
-        nmodels = len(cached)
-        d = np.shape(cached[0])[0]
-        for n in range(nmodels):
-            Abar = Abar + (1/nmodels) * cached[n]
-            print(n)
-        return Abar
-
-    def mean(self, cached, Cz):
-        Abar = np.zeros(np.shape(cached[0]))
-        nmodels = len(cached)
-        d = np.shape(cached[0])[0]
-        B = (2/nmodels)*np.sum(Cz@cached,axis=0)
-        Lambda, U = np.linalg.eig(Cz)
-        UBU = np.transpose(U) @ B @ U
-        D = np.zeros(np.shape(Cz))
-        for i in range(d):
-            for k in range(d):
-                D[i,k] = (1/(Lambda[i] + Lambda[k]))*UBU[i,k]
-        Kbar = U @ D @ np.transpose(U)
-        return Kbar
-
-
-    # def variance(self, Cz, cached, Kbar):
-    #     fvar = 0
-    #     for i in range(len(cached)):
-    #         fvar = fvar + np.trace(Kbar@Kbar@Cz) + np.trace(cached[i]@cached[i]@Cz) - 2 *np.trace(Kbar@cached[i]@Cz)
-    #         print(i)
-    #     return fvar
-
-    def variance(self, cached, Kbar, Cz):
-        fvar = 0
-        for i in range(len(cached)):
-            # fvar = fvar + 2 - 2 *np.trace(np.conjugate(np.transpose(Abar))@cached[i])
-            fvar = fvar + np.trace(Kbar@Cz@Kbar) + np.trace(cached[i]@Cz@cached[i]) - 2*np.trace(Kbar@Cz@cached[i])
-            print(i)
-        return fvar
-    
-
 
 class Flatten(nn.Module):
     def __init__(self):
@@ -313,7 +222,6 @@ class SoftMaxModule(nn.Module):
 
     def forward(self, x):
         return self.softmax(x)
-
 
 def bespoke_cov_matrix(z):
     """
@@ -337,9 +245,6 @@ def bespoke_cov_matrix(z):
     Cz = Cz/(n)
 
     return Cz
-
-
-
 
 def random_partitions_cov_matrix(M, n):
     """
@@ -368,7 +273,6 @@ def random_partitions_cov_matrix(M, n):
 
     return Cz
 
-
 def gaussian_partitions_cov_matrix(M, n):
     """
     Computes the empirical task covariance matrix if the desired readouts are a set of n samples from the M-dimensional standard normal distribution. 
@@ -395,7 +299,6 @@ def gaussian_partitions_cov_matrix(M, n):
 
     return Cz
 
-
 def update_gaussian_cov_matrix(Cz, n, delta_n):
     """ Update a Gaussian covariance matrix generated by gaussian_partitions_cov_matrix(M, n) with delta_n more samples.  
     """
@@ -411,7 +314,6 @@ def update_random_cov_matrix(Cz, n, delta_n):
     new_cov_contrib = delta_n*random_partitions_cov_matrix(M,delta_n)
     newCz = (1/(n + delta_n))*(n*Cz + new_cov_contrib)
     return newCz
-
 
 class PartitionsCovMatrix:
     """
@@ -448,7 +350,6 @@ class PartitionsCovMatrix:
         self.matrix = Cz
         
         return None
-
 
 def whiten(
     X: npt.NDArray, 

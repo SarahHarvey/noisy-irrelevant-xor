@@ -18,7 +18,7 @@ pip install -r requirements.txt
 ## To view and analyze previously extracted representations:
 
   
-Use the jupyter notebook make_xor_figs.ipynb. This notebook will load some previously extracted representations included in the ```trained_activations``` folder, and perform some basic plotting and analysis.
+Use the jupyter notebook "rep_sim_analysis.ipynb". This notebook will load some previously extracted representations included in the ```trained_activations``` folder, and perform some basic plotting and analysis.
 
   
 ## To train a new MLP XOR model
