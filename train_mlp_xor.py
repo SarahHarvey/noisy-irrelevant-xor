@@ -8,16 +8,15 @@ import os
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Train MLP on XOR task')
-parser.add_argument('--n_hidden', type=int, default=6, help='Number of hidden units')
+parser.add_argument('--n_hidden', type=int, default=25, help='Number of hidden units')
 parser.add_argument('--seed', type=int, default=None, help='Random seed (optional)')
-parser.add_argument('--load_data', action='store_true', help='Load existing data instead of generating new set')
+parser.add_argument('--load_data', action='store_true', default=True, help='Load existing data instead of generating new set')
 args = parser.parse_args()
 
 n_hidden = args.n_hidden
 
 # Set device to GPU if available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# device = torch.device("cpu")
 print(f"Using device: {device}")
 
 if args.seed is not None:
@@ -43,7 +42,8 @@ class MLP(nn.Module):
 # Load or create dataset
 if args.load_data:
     # Load existing dataset
-    data = torch.load("data/mlp_xor_dataset.pt")
+    print("Loading stored dataset...")
+    data = torch.load("data/mlp_xor_dataset.pt", map_location=torch.device(device))
     X_train = data["train_set"]["X_train"].to(device)
     y_train = data["train_set"]["y_train"].to(device)
     bits = data["bits_train"].to(device)
@@ -58,6 +58,7 @@ if args.load_data:
     
 else:
     # Create noisy XOR data
+    print("Creating new dataset...")
     n_samples = 10000
     n_test = 2000
     noise_std = 0.1
@@ -106,6 +107,7 @@ hook_handle_fc2 = model.fc2.register_forward_hook(get_activation('fc2'))
 hook_handle_fc1 = model.fc1.register_forward_hook(get_activation('fc1'))
 
 # Training loop
+print("Starting training MLP with {} hidden units...".format(n_hidden))
 epochs = 1000
 for epoch in range(epochs):
     total_loss = 0
